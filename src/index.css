@@ -1,0 +1,205 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Keriyo design tokens  (copy this @theme block into the real project)
+   ------------------------------------------------------------------ */
+@theme {
+  --font-sans: "Manrope", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand — taken from the Keriyo emblem (ink base + cyan accent) */
+  --color-ink-950: #0b1220;
+  --color-ink-900: #0f172a;
+  --color-ink-800: #1b2437;
+  --color-ink-700: #2a3449;
+
+  --color-brand-50: #ecfeff;
+  --color-brand-100: #cffafe;
+  --color-brand-200: #a5f3fc;
+  --color-brand-300: #67e8f9;
+  --color-brand-400: #22d3ee;
+  --color-brand-500: #06b6d4;
+  --color-brand-600: #0891b2;
+  --color-brand-700: #0e7490; /* AA text on white */
+  --color-brand-800: #155e75;
+
+  /* Surfaces */
+  --color-page: #f7f7f5;
+  --color-tile: #ecebe9;
+  --color-line: #e7e5e4;
+
+  --radius-control: 0.625rem;
+  --radius-card: 1rem;
+
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 1px rgb(15 23 42 / 0.03);
+  --shadow-lift: 0 10px 30px -12px rgb(15 23 42 / 0.18), 0 2px 6px rgb(15 23 42 / 0.05);
+  --shadow-pop: 0 24px 60px -20px rgb(11 18 32 / 0.45);
+
+  --ease-out-soft: cubic-bezier(0.22, 0.8, 0.24, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--color-page);
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "tnum" 0;
+}
+::selection {
+  background: var(--color-brand-200);
+  color: #0b1220;
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.thin-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: #d6d3d1;
+  border-radius: 8px;
+}
+
+/* ------------------------------------------------------------------
+   Motion system — 6 keyframes, one easing curve, GPU-only properties
+   ------------------------------------------------------------------ */
+@keyframes k-rise {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes k-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes k-scale {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes k-drawer-r {
+  from { transform: translate3d(100%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+@keyframes k-drawer-l {
+  from { transform: translate3d(-100%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+@keyframes k-shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+@keyframes k-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes k-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
+}
+@keyframes k-bar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.anim-rise  { animation: k-rise 0.55s var(--ease-out-soft) both; }
+.anim-fade  { animation: k-fade 0.3s ease-out both; }
+.anim-scale { animation: k-scale 0.28s var(--ease-out-soft) both; }
+.anim-drawer-r { animation: k-drawer-r 0.38s var(--ease-out-soft) both; }
+.anim-drawer-l { animation: k-drawer-l 0.38s var(--ease-out-soft) both; }
+.anim-float { animation: k-float 7s ease-in-out infinite; }
+
+/* Page transition: enter only, 260ms, never blocks the content */
+.page-enter { animation: k-rise 0.32s var(--ease-out-soft) both; }
+
+/* Scroll reveal (IntersectionObserver adds .in) */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  transition: opacity 0.6s var(--ease-out-soft), transform 0.6s var(--ease-out-soft);
+  transition-delay: var(--d, 0ms);
+  will-change: opacity, transform;
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* Hero choreography: waits for splash hand-off */
+html[data-intro="playing"] .hero-in {
+  opacity: 0;
+}
+html:not([data-intro="playing"]) .hero-in {
+  animation: k-rise 0.8s var(--ease-out-soft) both;
+  animation-delay: var(--d, 0ms);
+}
+/* The real navbar logo stays invisible until the splash logo lands on it */
+html[data-intro="playing"] #brand-logo-target,
+html[data-intro="fly"] #brand-logo-target {
+  opacity: 0;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #e7e5e4;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.6), transparent);
+  animation: k-shimmer 1.4s infinite;
+}
+
+/* Product card image zoom */
+.zoom-img {
+  transition: transform 0.7s var(--ease-out-soft);
+}
+.group:hover .zoom-img {
+  transform: scale(1.045);
+}
+
+/* Logo stroke draw (splash) */
+.logo-draw path,
+.logo-draw rect {
+  stroke-dasharray: 260;
+  stroke-dashoffset: 260;
+  animation: k-draw 0.9s var(--ease-out-soft) forwards;
+}
+.logo-draw .fillin {
+  animation: k-draw 0.9s var(--ease-out-soft) forwards, k-fade 0.5s 0.55s ease-out both;
+}
+
+@media print {
+  .no-print { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+}
